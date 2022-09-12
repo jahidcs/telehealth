@@ -17,12 +17,12 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('patient_id', 'appointment_id', 'schedule_id', 'appointment_status', 'payment_status')
+    list_display = ('patient_id', 'appointment_id', 'schedule_id', 'pat_id', 'appointment_date', 'appointment_status', 'payment_status', 'is_completed')
     list_filter = ('payment_status',)
     fieldsets = (
         ('Patient', {'fields': ('patient_id',)}),
         ('Schedule', {'fields': ('schedule_id', 'doctor_id')}),
-        ('Appointment',{'fields': ('appointment_status', 'payment_status', 'reason', 'doctor_comment')}),
+        ('Appointment',{'fields': ('pat_id', 'appointment_date', 'appointment_status', 'payment_status', 'is_completed', 'reason', 'doctor_comment')}),
     )
 
 

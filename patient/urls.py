@@ -6,6 +6,10 @@ from patient.views import (
     CheckOtp,
     PatientProfileAccess,
     AppointmentBooking,
+    FindDoctor,
+    DoctorScheduleList,
+    PatientAppointmentList,
+    DoctorScheduleDetails,
 )
 
 urlpatterns = [
@@ -14,5 +18,11 @@ urlpatterns = [
     path('profile/', PatientProfileAccess.as_view(), name='profile-view'),
     path('appointment/', AppointmentBooking.as_view(), name='appointment-book'),
     path('doctor-list/', DoctorList.as_view(), name='doctor-list'),
-    path('doctor-profile/<id>/', DoctorDetails.as_view(), name='doctor-profile')
+    path('find-doctor/', FindDoctor.as_view(), name='doctor-find'),
+    path('doctor-profile/<id>/', DoctorDetails.as_view(), name='doctor-profile'),
+    path('doctor-schedule/', DoctorScheduleList.as_view(), name='doctor-schedule'),
+    path('doctor-schedule-details/', DoctorScheduleDetails.as_view(), name='schedule-details'),
+    path('appointment-list/', PatientAppointmentList.as_view(), name='appointment-list'),
+
+
 ]

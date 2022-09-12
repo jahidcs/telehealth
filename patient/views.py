@@ -7,7 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from account.models import User
 from account.renderer import UserRenderer
-from doctor.models import Doctor
+from doctor.models import Doctor, DoctorSchedule
+from doctor.serializers import ScheduleListSerializer
 from patient.models import Patient, Appointment
 from patient.serializers import (
     DoctorUserListSerializer,
@@ -16,6 +17,8 @@ from patient.serializers import (
     PatientOtpSerializer,
     PatientUserViewSerializer,
     PatientProfileViewSerializer,
+    DoctorScheduleListSerializer,
+    PatientAppointListSerializer
 )
 
 def token_generator(user):
@@ -54,7 +57,7 @@ class PatientAccessOtp(CreateAPIView):
                 user.save()
                 result = {
                     'message': 'OTP sent',
-                    'user': user.phone,
+                    'phone': user.phone,
                 }
                 return Response(
                     result,
@@ -119,11 +122,13 @@ class CheckOtp(CreateAPIView):
                 user.otp = ''
                 user.save()
                 token = token_generator(user)
-                result = {
-                    'token': token,
-                    'message': 'access provided',
-                }
-                return Response(result, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        'token': token,
+                        'message': 'access provided',
+                    },
+                    status=status.HTTP_200_OK
+                )
                 
             else:
                 return Response(
@@ -170,26 +175,12 @@ class AppointmentBooking(CreateAPIView):
         patient = Patient.objects.filter(patient=patient['id']).first()
         data = request.data
 
-        if 'schedule_id' not in data or data['schedule_id'] == '':
-                return Response(
-                    {
-                        'errors': 'schedule_id should be provided'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        
-        if 'doctor_id' not in data or data['doctor_id'] == '':
-                return Response(
-                    {
-                        'errors': 'doctor_id should be provided'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
         try:
             appointment = Appointment()
             appointment.patient_id = patient
+            appointment.pat_id = patient.pid
             appointment.schedule_id = data['schedule_id']
+            appointment.appointment_date = data['appointment_date']
             appointment.doctor_id = data['doctor_id']
             appointment.reason = data['reason']
             appointment.save()
@@ -211,16 +202,42 @@ class AppointmentBooking(CreateAPIView):
 
 class DoctorList(ListAPIView):
     # permission_classes = [IsAuthenticated]
-    def get(self, request, format=None):
-        result = {}
-        doctor = User.objects.filter(role_id='doctor', is_active= True).all()
-        doctor = DoctorUserListSerializer(doctor, many=True).data
-        result['doctor'] = doctor
-        return Response(result, status=status.HTTP_200_OK)
+    def post(self, request, format=None):
+        try:
+            data = request.data
+            doctor = Doctor.objects.filter(district=data['district'], speciality=data['speciality']).all()
+            doctor = DoctorProfileListSerializer(doctor, many=True).data
+            return Response(
+                {
+                    "profile": doctor
+                },
+                status=status.HTTP_200_OK
+            )
+        except Exception as ex:
+            return Response(
+                {
+                    "errors": {str(ex)}
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class PatientAppointmentList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        queryset = Appointment.objects.all()
+
+        #filters
+        patient = self.request.query_params.get('pat_id', None)
+        if patient:
+            queryset = queryset.filter(pat_id=patient)
+        serializer = PatientAppointListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class DoctorDetails(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id, format=None, context={'id':id}):
         result = {}
@@ -232,3 +249,43 @@ class DoctorDetails(APIView):
         result['user'] = doctor
         result['profile'] = doctor_profile
         return Response(result, status=status.HTTP_200_OK)
+
+
+class FindDoctor(APIView):
+    def get(self, request, *args, **kwargs):
+        queryset = Doctor.objects.all()
+
+        # Filters
+        district = self.request.query_params.get('district', None)
+        speciality = self.request.query_params.get('speciality', None)
+        if district or speciality:
+            queryset = queryset.filter(district=district, speciality=speciality)
+        serializer = DoctorProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class DoctorScheduleList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        queryset = DoctorSchedule.objects.all()
+        
+        #filters
+        did = self.request.query_params.get('did', None)
+        if did:
+            queryset = queryset.filter(did=did)
+        serializer = DoctorScheduleListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class DoctorScheduleDetails(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        queryset = DoctorSchedule.objects.all()
+
+        #filters
+        schedule = self.request.query_params.get('schedule_id', None)
+        if schedule:
+            queryset = queryset.filter(schedule_id=schedule)
+        serializer = DoctorScheduleListSerializer(queryset, many=True)
+        return Response(serializer.data)
