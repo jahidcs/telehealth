@@ -42,6 +42,7 @@ class Doctor(models.Model):
 
 class DoctorSchedule(models.Model):
     doctor_id = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='for_doctor')
+    did = models.IntegerField(null=True, blank=True)
     schedule_id = models.AutoField(primary_key=True, verbose_name='schedule id')
     schedule_day = models.CharField(max_length=50, null=True, blank=False, choices=DAY_CHOICES, verbose_name='schedule day')
     start_time = models.TimeField(verbose_name='start time', auto_now=False, auto_now_add=False)
