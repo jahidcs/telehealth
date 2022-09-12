@@ -171,6 +171,7 @@ AUTH_USER_MODEL = 'account.User'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:3002",
     "http://127.0.0.1:8000",
 ]
 
