@@ -10,6 +10,7 @@ from patient.views import (
     DoctorScheduleList,
     PatientAppointmentList,
     DoctorScheduleDetails,
+    PatientAppointListByUser,
 )
 
 urlpatterns = [
@@ -23,6 +24,5 @@ urlpatterns = [
     path('doctor-schedule/', DoctorScheduleList.as_view(), name='doctor-schedule'),
     path('doctor-schedule-details/', DoctorScheduleDetails.as_view(), name='schedule-details'),
     path('appointment-list/', PatientAppointmentList.as_view(), name='appointment-list'),
-
-
+    path('appointment-list-user/', PatientAppointListByUser.as_view(), name='patient-appointment-list')
 ]

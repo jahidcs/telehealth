@@ -33,7 +33,7 @@ class PatientProfileViewSerializer(serializers.ModelSerializer):
 class PatientAppointListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['appointment_id', 'pat_id', 'schedule_id', 'appointment_date', 'doctor_id', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
+        fields = ['appointment_id', 'patient_id', 'pat_id', 'schedule_id', 'appointment_date', 'doctor_id', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
 
 
 class DoctorUserListSerializer(serializers.ModelSerializer):

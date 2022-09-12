@@ -72,7 +72,7 @@ class DoctorScheduleSerializer(serializers.ModelSerializer):
 class AppointmentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['patient_id', 'appointment_id', 'schedule_id', 'doctor_id', 'serial', 'appointment_date', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
+        fields = ['patient_id', 'pat_id', 'appointment_id', 'schedule_id', 'doctor_id', 'serial', 'appointment_date', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
 
 
 class ScheduleListSerializer(serializers.ModelSerializer):

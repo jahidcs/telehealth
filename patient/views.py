@@ -236,6 +236,17 @@ class PatientAppointmentList(APIView):
         return Response(serializer.data)
 
 
+class PatientAppointListByUser(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        patient = PatientUserViewSerializer(request.user).data
+        print(patient)
+        appointments = Appointment.objects.filter(pat_id=patient['id']).all()
+        appointments = PatientAppointListSerializer(appointments, many=True)
+        return Response(appointments.data, status=status.HTTP_200_OK)
+
+
 class DoctorDetails(APIView):
     permission_classes = [IsAuthenticated]
 
