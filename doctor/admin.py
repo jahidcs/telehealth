@@ -20,10 +20,10 @@ class DoctorAdmin(admin.ModelAdmin):
 
 
 class DoctorScheduleAdmin(admin.ModelAdmin):
-    list_display = ('doctor_id', 'schedule_id', 'schedule_day', 'start_time', 'end_time', 'avg_consulting_time', 'schedule_status')
+    list_display = ('doctor_id', 'did', 'schedule_id', 'schedule_day', 'start_time', 'end_time', 'avg_consulting_time', 'schedule_status')
     list_filter = ('schedule_day',)
     fieldsets = (
-        ('Doctor', {'fields': ('doctor_id',)}),
+        ('Doctor', {'fields': ('doctor_id', 'did')}),
         ('Identifier', {'fields': ('schedule_day', 'schedule_status',)}),
         ('Schedule details', {'fields': ('start_time', 'end_time', 'avg_consulting_time',)}),
     )

@@ -17,8 +17,8 @@ from doctor.serializers import (
     DoctorRegisterSerializer,
     DoctorLoginSerializer,
     DoctorUserViewSerializer,
-    DoctorScheduleSerializer,
-)
+    ScheduleListSerializer
+    )
 
 def token_generator(user):
     refresh = RefreshToken.for_user(user)
@@ -287,13 +287,14 @@ class DoctorScheduleSet(CreateAPIView):
             )
 
         try:
-            doctor_schedule = DoctorSchedule()
-            doctor_schedule.doctor_id = doctor
-            doctor_schedule.schedule_day = data['schedule_day']
-            doctor_schedule.start_time = data['start_time']
-            doctor_schedule.end_time = data['end_time']
-            doctor_schedule.avg_consulting_time = data['avg_consulting_time']
-            doctor_schedule.save()
+            doctorSchedule = DoctorSchedule()
+            doctorSchedule.doctor_id = doctor
+            doctorSchedule.did = doctor.did
+            doctorSchedule.schedule_day = data['schedule_day']
+            doctorSchedule.start_time = data['start_time']
+            doctorSchedule.end_time = data['end_time']
+            doctorSchedule.avg_consulting_time = data['avg_consulting_time']
+            doctorSchedule.save()
 
             return Response(
                 {
@@ -309,17 +310,84 @@ class DoctorScheduleSet(CreateAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class ScheduleList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        user = DoctorUserViewSerializer(request.user).data
+        doctor = Doctor.objects.filter(doctor=user['id']).first()
+        doctor= doctor.did
+        print("doctor", doctor)
+        try:
+            schedule = DoctorSchedule.objects.filter(did=doctor).all()
+            schedule = ScheduleListSerializer(schedule, many=True)
+            return Response(schedule.data)
+        except Exception as ex:
+            return Response(
+                {
+                    'errors': {str(ex)}
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         
 
 class AppointmentList(ListAPIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, format=None):
-        result = {}
         doctor = DoctorUserViewSerializer(request.user).data
         appointment = Appointment.objects.filter(doctor_id=doctor['id']).all()
         print(appointment)
-        appointment = AppointmentListSerializer(appointment, many=True).data
+        appointment = AppointmentListSerializer(appointment, many=True)
 
-        result['appointment_list'] = appointment
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(appointment.data, status=status.HTTP_200_OK)
+
+
+class AppointmentDetails(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, id, format=None, context={'id':id}):
+        doctor = DoctorUserViewSerializer(request.user).data
+        print(doctor)
+        appointment = Appointment.objects.filter(appointment_id=id).first()
+        serializer = AppointmentListSerializer(appointment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GiveComment(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, id, format=None, context={'id':id}):
+        doctor = DoctorUserViewSerializer(request.user).data
+        print(doctor)
+        appointment = Appointment.objects.filter(appointment_id=id).first()
+        data = request.data
+        try:
+            if not appointment.payment_status:
+                return Response(
+                    {
+                        'errors':{
+                            'reason': 'patient does not paid for appointment',
+                            "message": "You can not comment"
+                        },
+                    },
+                    status=status.HTTP_402_PAYMENT_REQUIRED
+                )
+            else:
+                appointment.doctor_comment = data['doctor_comment']
+                appointment.save()
+                return Response(
+                    {
+                        'message': 'commented',
+                    },
+                    status=status.HTTP_200_OK
+                )
+        except Exception as ex:
+            return Response(
+                {
+                    'errors': {str(ex)}
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )

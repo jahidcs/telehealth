@@ -60,7 +60,7 @@ class DoctorScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorSchedule
         fields = [
-            'doctor_id', 'schedule_id',  'schedule_status',
+            'doctor_id', 'did', 'schedule_id',  'schedule_status',
             'schedule_day', 'start_time', 'end_time', 
             'avg_consulting_time'
         ]
@@ -72,4 +72,12 @@ class DoctorScheduleSerializer(serializers.ModelSerializer):
 class AppointmentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = ['patient_id', 'appointment_id', 'schedule_id', 'doctor_id', 'serial', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
+        fields = ['patient_id', 'appointment_id', 'schedule_id', 'doctor_id', 'serial', 'appointment_date', 'reason', 'appointment_status', 'payment_status', 'doctor_comment', 'is_completed']
+
+
+class ScheduleListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorSchedule
+        fields = ['doctor_id', 'did', 'schedule_id',  'schedule_status',
+            'schedule_day', 'start_time', 'end_time', 
+            'avg_consulting_time']

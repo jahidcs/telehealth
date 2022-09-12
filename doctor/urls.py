@@ -4,7 +4,10 @@ from doctor.views import (
     DoctorLogin,
     DoctorProfileAccess,
     DoctorScheduleSet,
-    AppointmentList
+    AppointmentList,
+    ScheduleList,
+    AppointmentDetails,
+    GiveComment,
 )
 
 urlpatterns = [
@@ -13,4 +16,7 @@ urlpatterns = [
     path('profile/', DoctorProfileAccess.as_view(), name='profile'),
     path('schedule/', DoctorScheduleSet.as_view(), name='doctor-schedule'),
     path('appointments/', AppointmentList.as_view(), name='doctor-appointment'),
+    path('schedule-list/', ScheduleList.as_view(), name='schedule-list'),
+    path('appointmentdetails/<id>/', AppointmentDetails.as_view(), name='appointment-details'),
+    path('comment/<id>/', GiveComment.as_view(), name='comment'),
 ]
